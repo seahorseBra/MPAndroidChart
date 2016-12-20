@@ -2,11 +2,15 @@
 package com.xxmassdeveloper.mpchartexample;
 
 import android.annotation.SuppressLint;
+import android.content.pm.ComponentInfo;
+import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -14,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.Legend.LegendForm;
 import com.github.mikephil.charting.components.Legend.LegendPosition;
@@ -25,6 +30,7 @@ import com.github.mikephil.charting.components.YAxis.YAxisLabelPosition;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -39,6 +45,7 @@ import com.xxmassdeveloper.mpchartexample.custom.XYMarkerView;
 import com.xxmassdeveloper.mpchartexample.notimportant.DemoBase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class BarChartActivity extends DemoBase implements OnSeekBarChangeListener,
         OnChartValueSelectedListener {
@@ -56,7 +63,12 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
 
         tvX = (TextView) findViewById(R.id.tvXMax);
         tvY = (TextView) findViewById(R.id.tvYMax);
-
+        tvX.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChart.animateY(3000);
+            }
+        });
         mSeekBarX = (SeekBar) findViewById(R.id.seekBar1);
         mSeekBarY = (SeekBar) findViewById(R.id.seekBar2);
 
@@ -75,11 +87,13 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
         // scaling can now only be done on x- and y-axis separately
         mChart.setPinchZoom(false);
 
-        mChart.setDrawGridBackground(false);
-        // mChart.setDrawYLabels(false);
+        mChart.setDrawGridBackground(true);
+//        mChart.setGridBackgroundColor(0x99ff9999);
+//        mChart.setDragEnabled(false);
 
         IAxisValueFormatter xAxisFormatter = new DayAxisValueFormatter(mChart);
 
+        //横坐标样式
         XAxis xAxis = mChart.getXAxis();
         xAxis.setPosition(XAxisPosition.BOTTOM);
         xAxis.setTypeface(mTfLight);
@@ -89,10 +103,12 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
         xAxis.setValueFormatter(xAxisFormatter);
 
         IAxisValueFormatter custom = new MyAxisValueFormatter();
-
+        //纵坐标样式
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setTypeface(mTfLight);
         leftAxis.setLabelCount(8, false);
+        leftAxis.setDrawGridLines(true);
+        leftAxis.setGridDashedLine(new DashPathEffect(new float[]{10,5}, 1));
         leftAxis.setValueFormatter(custom);
         leftAxis.setPosition(YAxisLabelPosition.OUTSIDE_CHART);
         leftAxis.setSpaceTop(15f);
@@ -106,9 +122,10 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
         rightAxis.setSpaceTop(15f);
         rightAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
 
+        //表头设置
         Legend l = mChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
         l.setDrawInside(false);
         l.setForm(LegendForm.SQUARE);
@@ -124,7 +141,8 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
         mv.setChartView(mChart); // For bounds control
         mChart.setMarker(mv); // Set the marker to the chart
 
-        setData(12, 50);
+
+        setData(11, 50);
 
         // setting data
         mSeekBarY.setProgress(50);
@@ -248,18 +266,20 @@ public class BarChartActivity extends DemoBase implements OnSeekBarChangeListene
             mChart.getData().notifyDataChanged();
             mChart.notifyDataSetChanged();
         } else {
-            set1 = new BarDataSet(yVals1, "The year 2017");
-            set1.setColors(ColorTemplate.MATERIAL_COLORS);
-
             ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
-            dataSets.add(set1);
+            for (int i = 0; i < yVals1.size();i += 3) {
+                BarDataSet barDataSet = new BarDataSet(yVals1.subList(i,i+3),"");
+                barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+                dataSets.add(barDataSet);
+            }
 
             BarData data = new BarData(dataSets);
             data.setValueTextSize(10f);
             data.setValueTypeface(mTfLight);
-            data.setBarWidth(0.9f);
+            data.setBarWidth(0.8f);
 
             mChart.setData(data);
+            mChart.groupBars(0, 1f, 0.1f);
         }
     }
 

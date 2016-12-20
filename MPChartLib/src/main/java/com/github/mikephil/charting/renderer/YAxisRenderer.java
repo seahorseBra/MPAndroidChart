@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Path;
+import android.graphics.PathEffect;
 import android.graphics.RectF;
 
 import com.github.mikephil.charting.components.LimitLine;
